@@ -1,3 +1,4 @@
+using Hydra.Payments.Api.Facade;
 using Hydra.Payments.Api.Infrastructure;
 using Hydra.WebAPI.Core.Identity;
 using Microsoft.AspNetCore.Builder;
@@ -17,6 +18,8 @@ namespace Hydra.Payments.Api.Setup
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
             services.AddControllers();
+
+            services.Configure<PaymentConfig>(configuration.GetSection("PaymentConfig"));
             
             services.AddCors(options =>{
                 options.AddPolicy("Payment", builder =>
