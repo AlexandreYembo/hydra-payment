@@ -1,6 +1,6 @@
-namespace Hydra.Payments.CrossCutting.Enumerables
+namespace Hydra.Payments.Api.Enumerables
 {
-    public enum TransactionStatus
+   public enum TransactionStatus
     {
         Authorized = 1,
         Paid,

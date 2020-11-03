@@ -5,6 +5,7 @@ using Hydra.Payments.CrossCutting.Enumerables;
 using Hydra.Payments.CrossCutting.Models;
 using Microsoft.Extensions.Options;
 using Transaction = Hydra.Payments.Api.Models.Transaction;
+using TransactionStatus = Hydra.Payments.Api.Enumerables.TransactionStatus;
 
 namespace Hydra.Payments.Api.Facade
 {
@@ -40,11 +41,29 @@ namespace Hydra.Payments.Api.Facade
                 PaymentMethod = CrossCutting.Enumerables.PaymentMethod.CreditCard,
                 Amount = payment.Price
             };
-
+ 
             return MapTransaction(await transaction.AuthorizeCardTransaction());
         }
 
-        public static Transaction MapTransaction(CrossCutting.Models.Transaction transaction)
+        public async Task<Transaction> CapturePayment(Transaction transaction)
+        {
+            var service = new PaymentService(_config.DefaultApiKey, _config.DefaultEncryptionKey);
+
+            var transactionGateway = MapToGateway(transaction, service);
+
+            return MapTransaction(await transactionGateway.CaptureCardTransaction());
+        }
+
+        public async Task<Transaction> CancelPayment(Transaction transaction)
+        {
+             var service = new PaymentService(_config.DefaultApiKey, _config.DefaultEncryptionKey);
+
+            var transactionGateway = MapToGateway(transaction, service);
+
+            return MapTransaction(await transactionGateway.CancelAuthorization());
+        }
+
+        public Transaction MapTransaction(CrossCutting.Models.Transaction transaction)
         {
             return new Transaction
             {
@@ -55,6 +74,20 @@ namespace Hydra.Payments.Api.Facade
                 AuthorizationCode = transaction.AuthorizationCode,
                 Cost = transaction.Cost,
                 TransactionDate = transaction.TransactionDate,
+                Nsu = transaction.Nsu,
+                Tid = transaction.Tid
+            };
+        }
+
+        public CrossCutting.Models.Transaction MapToGateway(Transaction transaction, PaymentService service)
+        {
+            return new CrossCutting.Models.Transaction(service)
+            {
+                Status = (CrossCutting.Enumerables.TransactionStatus) transaction.Status,
+                Amount = transaction.Amount,
+                CardBrand = transaction.CardBrand,
+                AuthorizationCode = transaction.AuthorizationCode,
+                Cost = transaction.Cost,
                 Nsu = transaction.Nsu,
                 Tid = transaction.Tid
             };

@@ -1,6 +1,6 @@
 using System;
 using Hydra.Core.DomainObjects;
-using Hydra.Payments.CrossCutting.Enumerables;
+using Hydra.Payments.Api.Enumerables;
 
 namespace Hydra.Payments.Api.Models
 {
